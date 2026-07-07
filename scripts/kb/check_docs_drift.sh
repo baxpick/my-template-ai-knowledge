@@ -2,11 +2,16 @@
 #
 # check_docs_drift.sh — verify the knowledge base is internally consistent.
 #
-# Hard failures (exit 1): broken relative .md links; any per-tool adapter
-#   (CLAUDE.md, .cursorrules, .windsurfrules, .clinerules, GEMINI.md,
-#   .github/copilot-instructions.md, .aider.conf.yml, .gemini/settings.json)
-#   that does NOT point back to AGENTS.md; a file larger than its hard size cap;
-#   a STALENESS_MAP entry whose doc or source path no longer exists.
+# Hard failures (exit 1): broken relative .md links; any per-tool adapter — a
+#   single-file one (CLAUDE.md, GEMINI.md, AGENT.md, .cursorrules, .windsurfrules,
+#   .clinerules, .roorules, .goosehints, WARP.md, .aider.conf.yml,
+#   .gemini/settings.json, .junie/guidelines.md, .idx/airules.md,
+#   .github/copilot-instructions.md) OR a directory rule file (anything under
+#   .amazonq/rules/, .continue/rules/, .cursor/rules/, .windsurf/rules/,
+#   .devin/rules/, .roo/rules/, .clinerules/, .tabnine/guidelines/,
+#   .github/instructions/) — that does NOT point back to AGENTS.md; a file larger
+#   than its hard size cap; a STALENESS_MAP entry whose doc or source path no
+#   longer exists. The full tool→entrypoint map is docs/reference/agent-adapters.md.
 # Soft warnings (exit 0): recommended size caps, missing frontmatter, unreplaced
 #   ⟨…⟩ placeholders, missing CLAUDE.md shim, staleness heuristic, orphan docs.
 #
@@ -94,17 +99,18 @@ guard_size() {
 # adapter is treated identically. If an adapter exists but does not reference
 # AGENTS.md it will silently diverge → FAIL. CLAUDE.md is stricter: its first
 # lines must be the '@AGENTS.md' import Claude Code inlines (a prose mention is
-# not guaranteed to be followed). Works the same on macOS and Ubuntu/Linux.
+# not guaranteed to be followed). Only regular files are checked (a rules DIR is
+# handled by the glob loop over its contents). Works the same on macOS and Ubuntu.
 check_adapter() {
   local file="$1"
-  [ -e "$file" ] || return 0
+  [ -f "$file" ] || return 0
   if [ "$file" = "CLAUDE.md" ]; then
     head -n 3 "$file" | grep -q '^@AGENTS\.md' \
       || fail "CLAUDE.md must start with the '@AGENTS.md' import — otherwise it diverges from AGENTS.md"
     return 0
   fi
   grep -q 'AGENTS\.md' "$file" \
-    || fail "$file exists but does not point to AGENTS.md — make it a shallow pointer to the single entry point (see docs/ai-doc-solution-maker.md §3 step 8), or delete it"
+    || fail "$file exists but does not point to AGENTS.md — make it a shallow pointer to the single entry point (see docs/reference/agent-adapters.md), or delete it"
 }
 
 # ── Testability hook ────────────────────────────────────────────────────────
@@ -175,11 +181,29 @@ fi
 # ── 6. Per-tool adapter guards ──────────────────────────────────────────────
 # AGENTS.md is the single source of instructions. Per-tool files are allowed
 # ONLY as a shallow pointer to it — and are ALL treated identically (CLAUDE.md
-# included). Any adapter that does not reference AGENTS.md diverges → FAIL. See
-# check_adapter above; add new tools to the list as they appear.
-for adapter in CLAUDE.md .cursorrules .windsurfrules .clinerules GEMINI.md \
-               .github/copilot-instructions.md .aider.conf.yml .gemini/settings.json; do
+# included). Any adapter that does not reference AGENTS.md diverges → FAIL. The
+# authoritative tool→entrypoint map is docs/reference/agent-adapters.md; add new
+# tools to BOTH lists below as they appear.
+#
+# Single-file adapters (checked directly). Includes current entrypoints and
+# deprecated single-file rule formats so a brownfield leftover is caught too.
+for adapter in CLAUDE.md GEMINI.md AGENT.md \
+               .cursorrules .windsurfrules .clinerules .roorules .goosehints \
+               WARP.md .aider.conf.yml .gemini/settings.json \
+               .junie/guidelines.md .idx/airules.md \
+               .github/copilot-instructions.md; do
   check_adapter "$adapter"
+done
+# Directory rule adapters: every rule file present under a known rules dir must
+# point to AGENTS.md. Refs containing '*' are literal patterns that matched
+# nothing (no such dir) — the [ -f ] guard in check_adapter skips them.
+for pattern in .amazonq/rules/*.md .continue/rules/*.md .cursor/rules/*.mdc \
+               .windsurf/rules/*.md .devin/rules/*.md .roo/rules/*.md \
+               .clinerules/*.md .tabnine/guidelines/*.md \
+               .github/instructions/*.md; do
+  for f in $pattern; do
+    check_adapter "$f"
+  done
 done
 [ -f CLAUDE.md ] || warn "no CLAUDE.md import shim (Claude Code will not see AGENTS.md)"
 

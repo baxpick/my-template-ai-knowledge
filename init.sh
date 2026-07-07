@@ -86,6 +86,23 @@ if [[ -f .gemini/settings.json ]] && grep -q 'AGENTS.md' .gemini/settings.json; 
   targets+=(".gemini/settings.json")
 fi
 
+# Directory-based per-tool adapters (see docs/reference/agent-adapters.md). Each
+# is removed ONLY when it is the KB-generated SHALLOW POINTER (references
+# AGENTS.md) — never a user's real tool config that happens to share the path.
+GUARDED_ADAPTERS=(
+  .amazonq/rules/use-agents-md.md
+  .junie/guidelines.md
+  .continue/rules/use-agents-md.md
+  .tabnine/guidelines/use-agents-md.md
+  .idx/airules.md
+  .github/copilot-instructions.md
+)
+for a in "${GUARDED_ADAPTERS[@]}"; do
+  if [[ -f "$a" ]] && grep -q 'AGENTS.md' "$a"; then
+    targets+=("$a")
+  fi
+done
+
 # Nested AGENTS.md files anywhere in the tree, skipping .git, node_modules and
 # nested git repos/submodules (they own their files).
 while IFS= read -r f; do
@@ -109,7 +126,10 @@ else
   for t in "${targets[@]}"; do
     rm -rf -- "$t"
   done
-  # Drop now-empty parents.
+  # Drop now-empty parents (adapter dirs + KB dirs). rmdir is a no-op if the dir
+  # still holds a user's own files, so this never clobbers non-KB content.
+  rmdir .amazonq/rules .amazonq .continue/rules .continue \
+        .tabnine/guidelines .tabnine .junie .idx .gemini 2>/dev/null || true
   rmdir docs scripts 2>/dev/null || true
   info "clean done."
 fi

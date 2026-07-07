@@ -118,28 +118,28 @@ Each skeleton file carries inline instructions; this is the order:
    Do not assume a CI vendor — add only the one the repo already uses.
    Tip: scaffold docs and ADRs deterministically with `scripts/kb/new_doc.sh`
    (dated frontmatter) and `scripts/kb/new_adr.sh` (next number + index row).
-8. **Per-tool adapters (a SHALLOW import layer, not duplicates)** — `AGENTS.md`
-   stays THE single entry point. Where a tool does not read `AGENTS.md` natively,
-   add only a thin file that IMPORTS/points to it, never a copy of the rules. Do
-   NOT rely on symlinks (Windows checkouts and some tools mishandle them):
-   - Claude Code / Claude Desktop: keep the template's `CLAUDE.md`, whose first
-     line is `@AGENTS.md` — the officially documented import syntax that inlines
-     `AGENTS.md` at session start (a prose "see AGENTS.md" pointer is NOT
-     guaranteed to be followed). Truly Claude-specific lines may go below the
-     import. If the repo had its own `CLAUDE.md`, merge it per §2 first.
-   - Gemini CLI: `.gemini/settings.json` = `{ "context": { "fileName": "AGENTS.md" } }`.
-   - Aider: `.aider.conf.yml` = `read: AGENTS.md`.
-   - Codex, Cursor, Copilot, Windsurf, Zed, Cline, Amazon Q: nothing — native
-     `AGENTS.md`.
-   Never create per-tool rule DUPLICATES (`.cursorrules`, copilot-instructions,
-   …) that copy the actual rules; they diverge from `AGENTS.md`. If such a file
-   must exist, it may ONLY be a SHALLOW pointer that references `AGENTS.md` —
-   treated exactly like `CLAUDE.md`. `scripts/kb/check_docs_drift.sh` FAILS on any
-   adapter (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.clinerules`,
-   `GEMINI.md`, a `.github/copilot-instructions` file, `.aider.conf.yml`,
-   `.gemini/settings.json`) that does not point back to `AGENTS.md`. Note: some
-   tools strip HTML comments from instruction files before the agent sees them —
-   anything an agent must act on belongs in visible markdown.
+8. **Per-tool adapters (a SHALLOW pointer layer, not duplicates)** — `AGENTS.md`
+   stays THE single entry point. The authoritative tool→entrypoint map lives in
+   `docs/reference/agent-adapters.md`; keep it current. The rule: a tool that
+   reads `AGENTS.md` first (Codex, Copilot, Cursor, Windsurf, Zed, Cline, Roo,
+   Kilo, Warp, Amp, goose, OpenHands, Jules, Devin) gets NOTHING — a redundant
+   file only drifts. A tool that does NOT read `AGENTS.md` first gets a thin file
+   at its entrypoint that POINTS to `AGENTS.md`, never a copy of the rules. The
+   template already ships these shallow pointers (delete any for tools you never
+   use): `CLAUDE.md` (`@AGENTS.md` import — the officially documented syntax that
+   inlines it; truly Claude-specific lines go below), `.gemini/settings.json`
+   (`{ "context": { "fileName": "AGENTS.md" } }`), `.aider.conf.yml`
+   (`read: AGENTS.md`), `.amazonq/rules/`, `.junie/guidelines.md`,
+   `.continue/rules/`, `.tabnine/guidelines/`, `.idx/airules.md` (prose pointers).
+   Do NOT rely on symlinks (Windows checkouts and some tools mishandle them).
+   Never create per-tool rule DUPLICATES (`.cursorrules`, a
+   `.github/copilot-instructions` file, …) that copy the actual rules — they
+   diverge from `AGENTS.md`. If such a file must exist, it may ONLY be a SHALLOW
+   pointer that references `AGENTS.md`. `scripts/kb/check_docs_drift.sh` FAILS on
+   any adapter (single-file or under a known rules dir) that does not point back
+   to `AGENTS.md`. Note: some tools strip HTML comments from instruction files
+   before the agent sees them — anything an agent must act on belongs in visible
+   markdown.
 
 ## 3a. Reach completeness in ONE setup — audit until stable
 A single linear pass almost always MISSES things; that is why a fresh KB used to

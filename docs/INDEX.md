@@ -18,6 +18,7 @@ one line and keep this file small (it is read often).
 | Updating docs after a change | runbooks/keeping-docs-current.md |
 | "update the ai-doc solution" / periodic KB sweep | runbooks/kb-review.md |
 | Why is X designed this way? / changing a past design | decisions/README.md (ADR index) |
+| Which file each AI tool reads / adding a per-tool adapter | reference/agent-adapters.md |
 | Setting up / tailoring this knowledge base itself | ai-doc-solution-maker.md |
 | ⟨add repo-specific task → doc rows here⟩ | ⟨path.md⟩ |
 

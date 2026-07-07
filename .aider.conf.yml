@@ -1,0 +1,4 @@
+# Aider adapter — shallow pointer to AGENTS.md, the single source of agent
+# instructions. Aider reads no project file by default; this makes it load
+# AGENTS.md. See docs/reference/agent-adapters.md. Delete if you never use Aider.
+read: AGENTS.md
