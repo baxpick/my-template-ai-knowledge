@@ -22,6 +22,8 @@ reviews and commits everything together.
 5. New repeatable procedure you performed by hand → add a runbook here under
    `docs/runbooks/` (copy `../TEMPLATE.md`).
 6. If you renamed, removed, or added a doc that maps to a specific source path,
-   update the `STALENESS_MAP` in `scripts/kb/check_docs_drift.sh` to match. Then
-   run `scripts/kb/check_docs_drift.sh`; fix every failure. Leave all changes
+   update the `STALENESS_MAP` in `scripts/kb/check_docs_drift.sh` to match
+   (unsure what you touched? `scripts/kb/kb_review_worklist.sh 1` lists suggested
+   map entries for recently changed paths). Then run
+   `scripts/kb/check_docs_drift.sh`; fix every failure. Leave all changes
    uncommitted for the human to commit.

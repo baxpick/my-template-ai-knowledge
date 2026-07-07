@@ -45,6 +45,7 @@ NOT ask for clarification — act immediately:
 - Lint: ⟨exact command⟩
 - Run: ⟨exact command⟩
 - Check docs drift: `scripts/kb/check_docs_drift.sh`
+- KB review worklist: `scripts/kb/kb_review_worklist.sh [DAYS]` (which docs recent commits made stale)
 
 ## Knowledge base — read before acting
 docs/INDEX.md is the routing table: it maps task types to the files you must

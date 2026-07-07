@@ -13,7 +13,11 @@ a human-triggered prompt and can later be wired to a scheduled-agent feature.
 The sweep has two halves: **verify what exists** and **find what is missing**.
 
 ## Part A — verify existing docs
-1. Run `scripts/kb/check_docs_drift.sh`; note every warning/failure.
+1. Run `scripts/kb/kb_review_worklist.sh [DAYS]` first for a targeted worklist —
+   the docs recent commits implicate (via `STALENESS_MAP`) plus changed paths
+   nothing maps yet. Pass a window reaching back to the last sweep (e.g. `30` for
+   monthly; over-shoot when unsure). Then run `scripts/kb/check_docs_drift.sh` and
+   note every warning/failure.
 2. Walk `docs/INDEX.md` top to bottom; open each linked file; compare it to the
    code/config it describes (read the real files — never trust the doc).
 3. Fix stale content; bump `last_updated` on every edited file; merge duplicate
@@ -31,7 +35,8 @@ The sweep has two halves: **verify what exists** and **find what is missing**.
    `AGENTS.md`. Repeatable procedures done by hand recently → add a runbook.
    Decisions made but never recorded → add ADRs. Any doc that maps to a source
    path that was renamed/removed/added → update the `STALENESS_MAP` in
-   `scripts/kb/check_docs_drift.sh` so it stays complete and valid.
+   `scripts/kb/check_docs_drift.sh` so it stays complete and valid (the Part A
+   worklist's "consider mapping" suggestions list changed paths not yet mapped).
 9. Slight improvements are in scope: sharpen vague rules, make commands exact,
    split docs that grew past ~200 lines, tighten `read_when` lines.
 

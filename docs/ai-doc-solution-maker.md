@@ -172,7 +172,10 @@ Fully autonomous doc upkeep does not exist. What works: **same-session updates**
 (`docs/runbooks/keeping-docs-current.md`) + **scripted drift checks**
 (`scripts/kb/check_docs_drift.sh` in CI) + a **periodic sweep**
 (`docs/runbooks/kb-review.md`, triggered by the human phrase **"update the
-ai-doc solution"** — it verifies every doc AND hunts for coverage gaps). For
+ai-doc solution"** — it verifies every doc AND hunts for coverage gaps). The
+sweep is fronted by `scripts/kb/kb_review_worklist.sh`, which turns "re-read
+every doc" into a targeted, git-driven worklist (which docs recent commits
+implicate) and suggests missing `STALENESS_MAP` entries. For
 very large new features, consider an optional spec-driven flow (spec → plan →
 tasks → implement) later — do not build it now.
 

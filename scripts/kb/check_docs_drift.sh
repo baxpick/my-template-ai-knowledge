@@ -195,6 +195,8 @@ done
 # git >30 days after the doc's last_updated, warn. One "doc source" pair per line
 # (plain list, not an associative array — macOS ships bash 3.2). Example line:
 #   docs/architecture/overview.md src/
+# Tip: `scripts/kb/kb_review_worklist.sh` reads this map and, from recent git
+# history, suggests entries to ADD here for changed paths nothing maps yet.
 STALENESS_MAP="
 "
 HAVE_GIT=0
