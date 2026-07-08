@@ -25,6 +25,7 @@ read_when="${3:?read_when required (one line — task patterns that trigger read
 path="docs/$rel"
 
 case "$rel" in
+  /*|../*|*/../*|*/..) echo "refuse: path must be a relative path under docs/ (got '$rel')" >&2; exit 1 ;;
   *.md) : ;;
   *) echo "refuse: path must end in .md (got '$rel')" >&2; exit 1 ;;
 esac

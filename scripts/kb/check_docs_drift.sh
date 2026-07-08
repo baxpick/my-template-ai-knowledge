@@ -14,7 +14,7 @@
 #   longer exists. The full tool→entrypoint map is docs/reference/agent-adapters.md.
 # Soft warnings (exit 0): recommended size caps, missing frontmatter, unreplaced
 #   ⟨…⟩ placeholders, missing CLAUDE.md shim, staleness heuristic, orphan docs,
-#   top-level dirs mentioned nowhere in the architecture map (overview/AGENTS.md).
+#   top-level dirs mentioned nowhere in the architecture map (docs/architecture/overview.md or AGENTS.md).
 #
 # This is general tooling — it makes no assumptions about the project's domain.
 # Repos with an enumerable, auto-discoverable set of units can additionally add a
