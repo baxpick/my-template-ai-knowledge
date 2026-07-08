@@ -13,7 +13,8 @@
 #   than its hard size cap; a STALENESS_MAP entry whose doc or source path no
 #   longer exists. The full tool→entrypoint map is docs/reference/agent-adapters.md.
 # Soft warnings (exit 0): recommended size caps, missing frontmatter, unreplaced
-#   ⟨…⟩ placeholders, missing CLAUDE.md shim, staleness heuristic, orphan docs.
+#   ⟨…⟩ placeholders, missing CLAUDE.md shim, staleness heuristic, orphan docs,
+#   top-level dirs mentioned nowhere in the architecture map (overview/AGENTS.md).
 #
 # This is general tooling — it makes no assumptions about the project's domain.
 # Repos with an enumerable, auto-discoverable set of units can additionally add a
@@ -267,6 +268,31 @@ if [ -f docs/INDEX.md ]; then
       warn "$f is not routed from docs/INDEX.md (add a row so agents can find it)"
     fi
   done < <(find docs -name '*.md' 2>/dev/null | sed 's|^\./||')
+fi
+
+# ── 9. Top-level component coverage (warn only) ─────────────────────────────
+# Catches the #1 failure mode of incremental, same-session doc updates: a new
+# top-level directory (a new service/app/package) gets added but nobody
+# mentions it anywhere an agent would look for the architecture map. This is a
+# heuristic (whole-word match of the dir name, so `maps` does not hide a `map/`
+# dir but a path mention like `map/` still counts) — it proves nothing about
+# accuracy, only flags total silence, so a new area doesn't sit undocumented
+# until the next full "update the ai-doc solution" sweep. Skip infra/tooling
+# dirs and anything hidden (dotdirs are config, not components).
+SKIP_TOPLEVEL="docs scripts node_modules dist build out coverage vendor target venv __pycache__"
+if [ -f docs/architecture/overview.md ] || [ -f AGENTS.md ]; then
+  overview_body=""; [ -f docs/architecture/overview.md ] && overview_body="$(cat docs/architecture/overview.md)"
+  agents_body=""; [ -f AGENTS.md ] && agents_body="$(cat AGENTS.md)"
+  while IFS= read -r d; do
+    name="$(basename "$d")"
+    case "$name" in .*) continue ;; esac
+    skip=0
+    for s in $SKIP_TOPLEVEL; do [ "$name" = "$s" ] && skip=1 && break; done
+    [ "$skip" -eq 1 ] && continue
+    if ! printf '%s\n%s' "$overview_body" "$agents_body" | grep -qwF "$name"; then
+      warn "top-level dir '$name/' is not mentioned in docs/architecture/overview.md or AGENTS.md (new component undocumented?)"
+    fi
+  done < <(find . -maxdepth 1 -mindepth 1 -type d -not -path './.git' 2>/dev/null | sed 's|^\./||')
 fi
 
 echo

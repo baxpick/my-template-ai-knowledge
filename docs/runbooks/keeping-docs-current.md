@@ -1,5 +1,5 @@
 ---
-last_updated: 2026-07-05
+last_updated: 2026-07-08
 scope: The checklist to run after any change so docs ship with the code.
 read_when: The END of every task that changed files.
 ---
@@ -13,6 +13,12 @@ reviews and commits everything together.
 1. List what you changed (files + behavior).
 2. Open `docs/INDEX.md`; for every row whose files describe what you changed,
    update that file: fix the content and bump its `last_updated`.
+   **Added a new top-level directory/service/app (including the first one in a
+   greenfield repo)?** That always counts as "described by
+   `docs/architecture/overview.md`" — update its Components section even if the
+   repo started empty. `scripts/kb/check_docs_drift.sh` warns (heuristically)
+   when a top-level dir isn't mentioned in that file or `AGENTS.md`, but that is
+   a backstop, not a substitute for doing this now.
 3. New design decision or deviation from a convention → add an ADR
    (`scripts/kb/new_adr.sh "<title>"` picks the next number and indexes it; or copy
    `../decisions/0000-template.md` and add a row to `../decisions/README.md`).
